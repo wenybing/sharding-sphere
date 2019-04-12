@@ -1,0 +1,83 @@
+server:
+  port: 8081
+
+#spring:
+#   application:
+#    name: sharding-jdbc
+#   datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource            # 当前数据源操作类型
+#    driver-class-name: com.mysql.jdbc.Driver              # mysql驱动包
+#    url: jdbc:mysql://localhost:3306/test_01              # 数据库名称
+#    username: root
+#    password: root
+#    dbcp2:
+#      min-idle: 5                                           # 数据库连接池的最小维持连接数
+#      initial-size: 5                                       # 初始化连接数
+#      max-total: 5                                          # 最大连接数
+#      max-wait-millis: 200                                  # 等待连接获取的最大超时时间
+
+
+
+#mybatis.configuration.map-underscore-to-camel-case=true
+mybatis:
+  #configuration:
+  #  map-underscore-to-camel-case: true 开启驼峰映射
+  config-location: classpath:mybatis/mybatis.cfg.xml        # mybatis配置文件所在路径
+  type-aliases-package: com.example.shardingsphere.entity    # 所有Entity别名类所在包
+  mapper-locations:
+  - classpath:mybatis/mapper/**/*.xml                       # mapper映射文件
+
+#   目标：
+#   db0
+#   ├── t_order_0 user_id为偶数 order_id为偶数
+#   ├── t_order_1 user_id为偶数 order_id为奇数
+#   db1
+#   ├── t_order_0 user_id为奇数 order_id为偶数
+#   ├── t_order_1 user_id为奇数 order_id为奇数
+
+##############分库分表配置#########################
+sharding:
+  jdbc:
+    datasource:
+      names: ds0,ds1
+#数据源
+      ds0:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/ds0?useUnicode=true&characterEncoding=utf8&useSSL=false
+        username: root
+        password: root
+
+      ds1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/ds1?useUnicode=true&characterEncoding=utf8&useSSL=false
+        username: root
+        password: root
+#分库策略
+    config:
+      sharding:
+        default-database-strategy:
+          inline:
+            sharding-column: user_id
+            algorithm-expression: ds$->{user_id % 2}
+            #分表策略
+        tables:
+          t_order:
+            actual-data-nodes: ds$->{0..1}.t_order_$->{0..1}
+            table-strategy:
+              inline:
+                sharding-column: order_id
+                algorithm-expression: t_order_$->{order_id % 2}
+            default-key-generator-class-name: order_id
+
+          t_order_item:
+            actual-data-nodes: ds$->{0..1}.t_order_item_$->{0..1}
+            table-strategy:
+              inline:
+                sharding-column: order_id
+                algorithm-expression: t_order_item_$->{order_id % 2}
+            default-key-generator-class-name: order_item_id
+        binding-tables: t_order,t_order_item
+
+

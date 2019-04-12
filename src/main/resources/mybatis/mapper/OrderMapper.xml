@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.shardingsphere.dao.OrderDao">
+
+    <select id="queryAll" resultType="com.example.shardingsphere.entity.Order">
+        select * from t_order order by order_id ASC
+    </select>
+    <select id="query" parameterType="Long" resultType="com.example.shardingsphere.entity.Order">
+        select order_id,  user_id,  status from t_order where order_id=#{orderId};
+    </select>
+    <insert id="add" parameterType="com.example.shardingsphere.entity.Order">
+        INSERT INTO t_order(order_id,user_id,status) VALUES(#{orderId},#{userId},#{status});
+    </insert>
+    <delete id="delete" parameterType="Long">
+        delete FROM t_order where order_id=#{orderId}
+    </delete>
+
+    <update id="update" parameterType="com.example.shardingsphere.entity.Order">
+        update t_order SET status = #{status} where order_id = #{orderId}
+    </update>
+
+</mapper>
+

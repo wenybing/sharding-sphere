@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.shardingsphere.dao.CustomerDao">
+
+    <select id="queryAll" resultType="com.example.shardingsphere.entity.Customer">
+        select * from t_customer
+    </select>
+    <select id="query" parameterType="Long" resultType="com.example.shardingsphere.entity.Customer">
+        select customer_id,  customer_name,  telephone,identity_number from t_customer where customer_id=#{customerId};
+    </select>
+    <insert id="add" parameterType="com.example.shardingsphere.entity.Customer">
+        INSERT INTO t_customer(customer_id,  customer_name,  telephone,identity_number) VALUES(#{customerId},#{customerName},#{telephone},#{identityNumber});
+    </insert>
+    <delete id="delete" parameterType="Long">
+        delete FROM t_customer where customer_id=#{customerId}
+    </delete>
+
+    <update id="update" parameterType="com.example.shardingsphere.entity.Customer">
+        update t_customer SET customer_name=#{customerName},telephone=#{telephone} identity_number = #{identityNumber} where customer_id = #{customerid}
+    </update>
+
+</mapper>
+
